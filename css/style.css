@@ -577,10 +577,113 @@ body {
     }
 
     #start-screen h1 {
-        font-size: 20px;
+        font-size: 16px;
+    }
+
+    .subtitle {
+        font-size: 8px;
     }
 
     .characters {
         flex-direction: column;
+        gap: 10px;
+    }
+
+    .char-btn {
+        flex-direction: row;
+        min-width: auto;
+        padding: 10px 15px;
+    }
+
+    .char-img {
+        width: 48px;
+        height: 48px;
+    }
+
+    .start-btn {
+        padding: 12px 30px;
+        font-size: 12px;
+    }
+
+    .ranking-btn {
+        font-size: 9px;
+        padding: 8px 20px;
+    }
+
+    .character-select {
+        padding: 15px 20px;
+    }
+
+    .character-select h2 {
+        font-size: 10px;
+    }
+
+    /* タッチ操作のヒント */
+    .controls {
+        font-size: 7px;
+    }
+
+    .controls::after {
+        content: ' / スマホ: 画面をタッチして移動';
+    }
+}
+
+/* スマホ縦画面対応 */
+@media (max-width: 600px) {
+    #game-container {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    #start-screen h1 {
+        font-size: 14px;
+    }
+
+    .char-btn span {
+        font-size: 8px;
+    }
+
+    .char-btn small {
+        font-size: 6px;
+    }
+
+    .volume-control {
+        font-size: 10px;
+    }
+
+    #volumeSlider {
+        width: 150px;
+    }
+
+    .stats p {
+        font-size: 10px;
+    }
+
+    #game-over-screen h1 {
+        font-size: 24px;
+    }
+
+    .ranking-content {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .ranking-content h2 {
+        font-size: 12px;
+    }
+
+    #ranking-list li {
+        font-size: 9px;
+        padding: 6px 10px;
+    }
+}
+
+/* タッチデバイス用の操作防止 */
+@media (pointer: coarse) {
+    body {
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
     }
 }

@@ -637,7 +637,38 @@ class Game {
         // HUD描画
         if (this.state === 'playing' || this.state === 'levelUp') {
             this.hud.draw(this.ctx, this.player, this.gameTime, this.killCount, this.score);
+
+            // モバイル用ジョイスティック描画
+            this.drawJoystick();
         }
+    }
+
+    drawJoystick() {
+        const joystick = this.inputManager.getJoystickInfo();
+        if (!joystick) return;
+
+        const ctx = this.ctx;
+
+        // 外側の円（ベース）
+        ctx.beginPath();
+        ctx.arc(joystick.center.x, joystick.center.y, joystick.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 内側の円（スティック）
+        const stickX = joystick.center.x + joystick.direction.x * joystick.radius * 0.8;
+        const stickY = joystick.center.y + joystick.direction.y * joystick.radius * 0.8;
+
+        ctx.beginPath();
+        ctx.arc(stickX, stickY, 20, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
     }
 
     drawGrid() {

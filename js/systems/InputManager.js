@@ -1,6 +1,6 @@
 /**
  * 入力管理クラス
- * キーボード入力を検知し、移動方向を提供
+ * キーボード入力とタッチ入力を検知し、移動方向を提供
  */
 class InputManager {
     constructor() {
@@ -11,12 +11,77 @@ class InputManager {
             right: false
         };
 
+        // タッチ操作用
+        this.touchActive = false;
+        this.touchDirection = new Vector2(0, 0);
+        this.joystickCenter = null;
+        this.joystickRadius = 60;
+
         this.setupEventListeners();
+        this.setupTouchControls();
     }
 
     setupEventListeners() {
         window.addEventListener('keydown', (e) => this.handleKeyDown(e));
         window.addEventListener('keyup', (e) => this.handleKeyUp(e));
+    }
+
+    setupTouchControls() {
+        const canvas = document.getElementById('gameCanvas');
+        if (!canvas) return;
+
+        // タッチ開始
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            // タッチ位置をジョイスティックの中心に
+            this.joystickCenter = { x, y };
+            this.touchActive = true;
+        }, { passive: false });
+
+        // タッチ移動
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!this.touchActive || !this.joystickCenter) return;
+
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            // ジョイスティック中心からの差分
+            const dx = x - this.joystickCenter.x;
+            const dy = y - this.joystickCenter.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > 5) { // デッドゾーン
+                // 正規化して方向を設定
+                this.touchDirection = new Vector2(
+                    dx / Math.max(distance, this.joystickRadius),
+                    dy / Math.max(distance, this.joystickRadius)
+                );
+            } else {
+                this.touchDirection = new Vector2(0, 0);
+            }
+        }, { passive: false });
+
+        // タッチ終了
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.touchActive = false;
+            this.joystickCenter = null;
+            this.touchDirection = new Vector2(0, 0);
+        }, { passive: false });
+
+        canvas.addEventListener('touchcancel', (e) => {
+            this.touchActive = false;
+            this.joystickCenter = null;
+            this.touchDirection = new Vector2(0, 0);
+        });
     }
 
     handleKeyDown(e) {
@@ -65,6 +130,12 @@ class InputManager {
      * 移動方向ベクトルを取得（正規化済み）
      */
     getMovementDirection() {
+        // タッチ入力が有効な場合はそちらを優先
+        if (this.touchActive && (this.touchDirection.x !== 0 || this.touchDirection.y !== 0)) {
+            return this.touchDirection.normalized;
+        }
+
+        // キーボード入力
         let x = 0;
         let y = 0;
 
@@ -81,6 +152,19 @@ class InputManager {
      * 何かキーが押されているか
      */
     isMoving() {
-        return this.keys.up || this.keys.down || this.keys.left || this.keys.right;
+        return this.keys.up || this.keys.down || this.keys.left || this.keys.right ||
+            (this.touchActive && (this.touchDirection.x !== 0 || this.touchDirection.y !== 0));
+    }
+
+    /**
+     * ジョイスティックの描画情報を取得
+     */
+    getJoystickInfo() {
+        if (!this.touchActive || !this.joystickCenter) return null;
+        return {
+            center: this.joystickCenter,
+            direction: this.touchDirection,
+            radius: this.joystickRadius
+        };
     }
 }
