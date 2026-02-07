@@ -467,6 +467,11 @@ class Game {
         this.score += enemy.scoreValue || 10;
         soundManager.playSE('se_enemy_death');
 
+        // ボス撃破時はSpawnerに通知
+        if (enemy.isBoss) {
+            this.spawner.onBossKilled();
+        }
+
         // 経験値ジェムをドロップ
         const gem = new ExpGem(enemy.position.x, enemy.position.y, enemy.expValue);
         this.expGems.push(gem);

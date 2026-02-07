@@ -27,7 +27,8 @@ class SpriteManager {
                 { name: 'enemy_tank', path: 'assets/sprites/enemy_tank.png' },
                 { name: 'enemy_boss', path: 'assets/sprites/enemy_boss.png' },
                 { name: 'enemy_ranged', path: 'assets/sprites/enemy_ranged.png' },
-                { name: 'enemy_spider', path: 'assets/sprites/enemy_spider.png' }, // New sprite
+                { name: 'enemy_spider', path: 'assets/sprites/enemy_spider.png' },
+                { name: 'enemy_assassin', path: 'assets/sprites/enemy_assassin.png' },
             ];
 
             let loadedCount = 0;

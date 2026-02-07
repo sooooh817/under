@@ -14,6 +14,7 @@ class Spawner {
         this.bossSpawned = false;
         this.lastBossTime = 0;
         this.bossInterval = 240; // 4分ごと (225->240)
+        this.bossKillCount = 0; // ボス撃破数
     }
 
     update(deltaTime, gameTime, enemies, player) {
@@ -97,7 +98,10 @@ class Spawner {
         const rand = Math.random();
         const time = this.difficultyMultiplier;
 
-        if (time >= 1.6 && rand < 0.15) { // Tank: 1分30秒 (time >= 1.6)
+        // ボス撃破後はアサシン出現
+        if (this.bossKillCount >= 1 && rand < 0.12) {
+            return 'assassin';
+        } else if (time >= 1.6 && rand < 0.15) { // Tank: 1分30秒 (time >= 1.6)
             return 'tank';
         } else if (time >= 1.3 && rand < 0.25) { // Spider: 1分頃から (2.0 -> 1.3へ変更)
             return 'spider';
@@ -108,5 +112,9 @@ class Spawner {
         } else {
             return 'normal';
         }
+    }
+
+    onBossKilled() {
+        this.bossKillCount++;
     }
 }

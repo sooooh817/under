@@ -62,6 +62,16 @@ class Enemy extends Entity {
                 color: '#5555ff',
                 shape: 'triangle'
             },
+            assassin: {
+                hp: 5,
+                speed: 120,
+                damage: 8,
+                expValue: 2,
+                scoreValue: 25,
+                size: 10,
+                color: '#ff00ff',
+                shape: 'triangle'
+            },
             tank: {
                 hp: 40,
                 speed: 30,
