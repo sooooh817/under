@@ -535,6 +535,13 @@ class Game {
 
             case 'passiveUpgrade':
                 option.passive.upgrade();
+
+                // きずぐすりはアップグレード時も回復
+                if (option.passive.name === 'きずぐすり') {
+                    this.player.hp = Math.min(this.player.maxHp, this.player.hp + 20);
+                    this.showDamage(this.player.position.x, this.player.position.y - 40, "+20 HP", true);
+                }
+
                 this.player.applyPassives();
                 break;
 
