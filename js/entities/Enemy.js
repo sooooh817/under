@@ -14,6 +14,7 @@ class Enemy extends Entity {
         this.speed = stats.speed;
         this.damage = stats.damage;
         this.expValue = stats.expValue;
+        this.scoreValue = stats.scoreValue || 10;
         this.size = stats.size;
         this.color = stats.color;
         this.shape = stats.shape;
@@ -46,6 +47,7 @@ class Enemy extends Entity {
                 speed: 50,
                 damage: 5,
                 expValue: 1,
+                scoreValue: 10,
                 size: 15,
                 color: '#aa55cc',
                 shape: 'square'
@@ -55,6 +57,7 @@ class Enemy extends Entity {
                 speed: 80,
                 damage: 3,
                 expValue: 1,
+                scoreValue: 15,
                 size: 12,
                 color: '#5555ff',
                 shape: 'triangle'
@@ -64,6 +67,7 @@ class Enemy extends Entity {
                 speed: 30,
                 damage: 15,
                 expValue: 5,
+                scoreValue: 50,
                 size: 25,
                 color: '#888888',
                 shape: 'square'
@@ -73,6 +77,7 @@ class Enemy extends Entity {
                 speed: 25,
                 damage: 25,
                 expValue: 50,
+                scoreValue: 500,
                 size: 45,
                 color: '#cc3333',
                 shape: 'circle',
@@ -87,6 +92,7 @@ class Enemy extends Entity {
                 speed: 35,
                 damage: 5,
                 expValue: 3,
+                scoreValue: 30,
                 size: 16,
                 color: '#cc44ff',
                 shape: 'diamond',
@@ -99,6 +105,7 @@ class Enemy extends Entity {
                 speed: 40,
                 damage: 8,
                 expValue: 4,
+                scoreValue: 25,
                 size: 18,
                 color: '#444444',
                 shape: 'pentagon' // 新しい形状（五角形）または既存ので代用

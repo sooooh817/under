@@ -36,6 +36,8 @@ class Game {
         // ゲーム統計
         this.gameTime = 0;
         this.killCount = 0;
+        this.score = 0;
+        this.highScore = parseInt(localStorage.getItem('pocketSurvivorHighScore')) || 0;
 
         // 時間管理
         this.lastTime = 0;
@@ -380,6 +382,7 @@ class Game {
 
     onEnemyKilled(enemy) {
         this.killCount++;
+        this.score += enemy.scoreValue || 10;
         soundManager.playSE('se_enemy_death');
 
         // 経験値ジェムをドロップ
@@ -487,10 +490,22 @@ class Game {
     gameOver() {
         this.state = 'gameOver';
 
+        // ハイスコア更新チェック
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('pocketSurvivorHighScore', this.highScore);
+        }
+
         const gameOverScreen = document.getElementById('game-over-screen');
         document.getElementById('final-time').textContent = this.formatTime(this.gameTime);
         document.getElementById('final-kills').textContent = this.killCount;
         document.getElementById('final-level').textContent = this.player.level;
+
+        // スコア表示（要素が存在すれば）
+        const scoreEl = document.getElementById('final-score');
+        const highScoreEl = document.getElementById('final-highscore');
+        if (scoreEl) scoreEl.textContent = this.score;
+        if (highScoreEl) highScoreEl.textContent = this.highScore;
 
         gameOverScreen.classList.remove('hidden');
 
@@ -565,7 +580,7 @@ class Game {
 
         // HUD描画
         if (this.state === 'playing' || this.state === 'levelUp') {
-            this.hud.draw(this.ctx, this.player, this.gameTime, this.killCount);
+            this.hud.draw(this.ctx, this.player, this.gameTime, this.killCount, this.score);
         }
     }
 

@@ -8,7 +8,7 @@ class HUD {
         this.padding = 15;
     }
 
-    draw(ctx, player, gameTime, killCount) {
+    draw(ctx, player, gameTime, killCount, score) {
         ctx.save();
         ctx.font = '12px "Press Start 2P", monospace';
 
@@ -20,13 +20,28 @@ class HUD {
         // 上部中央: 経過時間
         this.drawTime(ctx, gameTime);
 
-        // 右上: 撃破数
+        // 右上: スコアと撃破数
+        this.drawScore(ctx, score);
         this.drawKillCount(ctx, killCount);
 
         // 左下: スキルアイコン
         this.drawSkillIcons(ctx, player);
 
         ctx.restore();
+    }
+
+    drawScore(ctx, score) {
+        const x = this.canvas.width - this.padding;
+        const y = this.padding + 28;
+
+        ctx.fillStyle = '#ffcc00';
+        ctx.font = '14px "Press Start 2P", monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#ff8800';
+        ctx.shadowBlur = 3;
+        ctx.fillText(`${score}`, x, y);
+        ctx.shadowBlur = 0;
     }
 
     drawHealthBar(ctx, player) {
