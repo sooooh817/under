@@ -119,6 +119,21 @@ class Enemy extends Entity {
                 size: 18,
                 color: '#444444',
                 shape: 'pentagon' // 新しい形状（五角形）または既存ので代用
+            },
+            bomber: {
+                hp: 70,
+                speed: 35,
+                damage: 10,
+                expValue: 8,
+                scoreValue: 40,
+                size: 20,
+                color: '#ff6600',
+                shape: 'circle',
+                shootInterval: 0, // 距離ベースで発射
+                shootRange: 9999, // 常に発射可能
+                projectileDamage: 6,
+                bulletCount: 8, // 8方向に発射
+                shootDistance: 75 // キャラ5体分(15*5)移動ごとに発射
             }
         };
         return stats[type] || stats.normal;
@@ -189,6 +204,17 @@ class Enemy extends Entity {
             if (this.distanceTraveled >= this.webDropThreshold) {
                 this.distanceTraveled = 0;
                 this.dropWeb(game);
+            }
+        } else if (this.type === 'bomber') {
+            // ボマー：移動距離に応じて全方向に弾幕発射
+            const moveAmount = this.speed * deltaTime;
+            this.position = this.position.add(direction.multiply(moveAmount));
+
+            this.distanceTraveled += moveAmount;
+            const shootDist = this.getStats(this.type).shootDistance || 75;
+            if (this.distanceTraveled >= shootDist) {
+                this.distanceTraveled = 0;
+                this.shootAllDirections(game);
             }
         } else {
             // プレイヤーに向かって移動
@@ -301,6 +327,30 @@ class Enemy extends Entity {
                 size: 10,
                 color: '#ff00ff',
                 lifetime: 5
+            });
+
+            game.enemyProjectiles.push(projectile);
+        }
+    }
+
+    // ボマー用：全方向に弾を発射
+    shootAllDirections(game) {
+        if (!game || !game.enemyProjectiles) return;
+
+        const stats = this.getStats(this.type);
+        const bulletCount = stats.bulletCount || 8;
+
+        for (let i = 0; i < bulletCount; i++) {
+            const angle = (i / bulletCount) * Math.PI * 2;
+            const dir = new Vector2(Math.cos(angle), Math.sin(angle));
+
+            const projectile = new EnemyProjectile(this.position.x, this.position.y, {
+                damage: this.projectileDamage,
+                speed: 120,
+                direction: dir,
+                size: 6,
+                color: '#ff6600',
+                lifetime: 4
             });
 
             game.enemyProjectiles.push(projectile);

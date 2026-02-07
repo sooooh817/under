@@ -101,6 +101,9 @@ class Spawner {
         // ボス撃破後はアサシン出現
         if (this.bossKillCount >= 1 && rand < 0.12) {
             return 'assassin';
+            // 2回目ボス撃破後はボマー出現
+        } else if (this.bossKillCount >= 2 && rand < 0.20) {
+            return 'bomber';
         } else if (time >= 1.6 && rand < 0.15) { // Tank: 1分30秒 (time >= 1.6)
             return 'tank';
         } else if (time >= 1.3 && rand < 0.25) { // Spider: 1分頃から (2.0 -> 1.3へ変更)

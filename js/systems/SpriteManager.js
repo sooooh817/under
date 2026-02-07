@@ -29,6 +29,7 @@ class SpriteManager {
                 { name: 'enemy_ranged', path: 'assets/sprites/enemy_ranged.png' },
                 { name: 'enemy_spider', path: 'assets/sprites/enemy_spider.png' },
                 { name: 'enemy_assassin', path: 'assets/sprites/enemy_assassin.png' },
+                { name: 'enemy_bomber', path: 'assets/sprites/enemy_bomber.png' },
             ];
 
             let loadedCount = 0;
