@@ -72,7 +72,7 @@ class Game {
         startBtn.addEventListener('click', () => {
             // プレイヤー名を保存
             const playerNameInput = document.getElementById('playerName');
-            const playerName = playerNameInput ? playerNameInput.value.trim() || '名無し' : '名無し';
+            const playerName = playerNameInput ? playerNameInput.value.trim() || 'No name' : 'No name';
             localStorage.setItem('pocketSurvivorPlayerName', playerName);
 
             startScreen.classList.add('hidden');
@@ -159,7 +159,7 @@ class Game {
         localStorage.setItem('pocketSurvivorRankings', JSON.stringify(rankings));
 
         // Firebaseにも保存（プレイヤー名を取得）
-        const playerName = localStorage.getItem('pocketSurvivorPlayerName') || '名無し';
+        const playerName = localStorage.getItem('pocketSurvivorPlayerName') || 'No name';
         if (firebaseManager && firebaseManager.initialized) {
             firebaseManager.saveScore(playerName, score, this.gameTime, this.player.level);
         }
@@ -195,7 +195,7 @@ class Game {
         list.innerHTML = rankings.map((r, i) => `
             <li>
                 <span class="rank">${i + 1}位</span>
-                <span class="name">${r.playerName || '名無し'}</span>
+                <span class="name">${r.playerName || 'No name'}</span>
                 <span class="score">${r.score}</span>
             </li>
         `).join('');

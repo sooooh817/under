@@ -46,7 +46,7 @@ class FirebaseManager {
 
         try {
             await this.db.collection('rankings').add({
-                playerName: playerName || '名無し',
+                playerName: playerName || 'No name',
                 score: score,
                 survivalTime: survivalTime,
                 level: level,
