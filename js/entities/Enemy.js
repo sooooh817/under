@@ -73,7 +73,7 @@ class Enemy extends Entity {
                 shape: 'square'
             },
             boss: {
-                hp: 200,
+                hp: 160,
                 speed: 25,
                 damage: 25,
                 expValue: 50,
@@ -84,7 +84,7 @@ class Enemy extends Entity {
                 shootInterval: 0.4,
                 shootRange: 400,
                 projectileDamage: 12,
-                bulletCount: 16,
+                bulletCount: 13,
                 isBoss: true
             },
             ranged: {
