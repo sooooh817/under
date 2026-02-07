@@ -462,6 +462,100 @@ body {
 }
 
 /* ===================================
+   ランキングボタン・モーダル
+   =================================== */
+
+.ranking-btn {
+    background: linear-gradient(180deg, #6644ff, #4422cc);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 25px;
+    color: white;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    box-shadow: 0 3px 0 #3311aa;
+}
+
+.ranking-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #3311aa, 0 5px 15px rgba(100, 68, 255, 0.4);
+}
+
+#ranking-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 20, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 150;
+}
+
+.ranking-content {
+    background: var(--panel-bg);
+    border: 3px solid var(--primary);
+    border-radius: 12px;
+    padding: 30px 40px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 0 30px var(--primary-glow);
+}
+
+.ranking-content h2 {
+    color: var(--primary);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+#ranking-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    text-align: left;
+}
+
+#ranking-list li {
+    color: var(--text-white);
+    font-size: 10px;
+    padding: 8px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+}
+
+#ranking-list li:nth-child(1) {
+    color: #ffd700;
+}
+
+#ranking-list li:nth-child(2) {
+    color: #c0c0c0;
+}
+
+#ranking-list li:nth-child(3) {
+    color: #cd7f32;
+}
+
+#ranking-list li span.rank {
+    min-width: 30px;
+}
+
+#ranking-list li span.score {
+    color: var(--primary);
+}
+
+.no-records {
+    color: var(--text-gray);
+    font-size: 10px;
+    padding: 20px;
+}
+
+/* ===================================
    非表示ユーティリティ
    =================================== */
 

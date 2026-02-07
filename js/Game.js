@@ -118,6 +118,59 @@ class Game {
             // 初期値反映（HTML側と合わせる）
             soundManager.setVolume(0.3);
         }
+
+        // ランキング表示
+        const rankingBtn = document.getElementById('rankingBtn');
+        const rankingModal = document.getElementById('ranking-modal');
+        const closeRankingBtn = document.getElementById('closeRankingBtn');
+
+        if (rankingBtn && rankingModal) {
+            rankingBtn.addEventListener('click', () => {
+                this.showRanking();
+                rankingModal.classList.remove('hidden');
+            });
+
+            closeRankingBtn.addEventListener('click', () => {
+                rankingModal.classList.add('hidden');
+            });
+        }
+    }
+
+    // ランキング関連メソッド
+    getRankings() {
+        const data = localStorage.getItem('pocketSurvivorRankings');
+        return data ? JSON.parse(data) : [];
+    }
+
+    saveToRankings(score) {
+        let rankings = this.getRankings();
+        rankings.push({
+            score: score,
+            date: new Date().toLocaleDateString('ja-JP')
+        });
+        // スコア順にソートしてトップ10を保存
+        rankings.sort((a, b) => b.score - a.score);
+        rankings = rankings.slice(0, 10);
+        localStorage.setItem('pocketSurvivorRankings', JSON.stringify(rankings));
+        return rankings;
+    }
+
+    showRanking() {
+        const list = document.getElementById('ranking-list');
+        const rankings = this.getRankings();
+
+        if (rankings.length === 0) {
+            list.innerHTML = '<li class="no-records">まだ記録がありません</li>';
+            return;
+        }
+
+        list.innerHTML = rankings.map((r, i) => `
+            <li>
+                <span class="rank">${i + 1}位</span>
+                <span class="score">${r.score}</span>
+                <span class="date">${r.date || ''}</span>
+            </li>
+        `).join('');
     }
 
     startGame() {
@@ -495,6 +548,9 @@ class Game {
             this.highScore = this.score;
             localStorage.setItem('pocketSurvivorHighScore', this.highScore);
         }
+
+        // ランキングに保存
+        this.saveToRankings(this.score);
 
         const gameOverScreen = document.getElementById('game-over-screen');
         document.getElementById('final-time').textContent = this.formatTime(this.gameTime);

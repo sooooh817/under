@@ -60,7 +60,20 @@
                 <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.3">
             </div>
 
+            <button id="rankingBtn" class="ranking-btn">🏆 ランキング</button>
+
             <p class="controls">移動: WASD または 矢印キー</p>
+        </div>
+
+        <!-- ランキングモーダル -->
+        <div id="ranking-modal" class="hidden">
+            <div class="ranking-content">
+                <h2>🏆 ハイスコアランキング TOP10</h2>
+                <ol id="ranking-list">
+                    <!-- JSで動的に生成 -->
+                </ol>
+                <button id="closeRankingBtn" class="start-btn">閉じる</button>
+            </div>
         </div>
         <div id="game-over-screen" class="hidden">
             <h1>GAME OVER</h1>
