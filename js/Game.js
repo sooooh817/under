@@ -420,6 +420,11 @@ class Game {
                             this.onEnemyKilled(enemy);
                         }
 
+                        // アサシンに当たったら貫通を止める
+                        if (enemy.blocksPierce && projectile.pierce > 0) {
+                            projectile.pierce = 0;
+                        }
+
                         // クリティカル判定（仮：今は常になし）
                         // 将来的には projectile.critical などを参照
                         this.showDamage(enemy.position.x, enemy.position.y - 10, projectile.damage, false);

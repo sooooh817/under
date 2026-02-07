@@ -41,6 +41,9 @@ class Enemy extends Entity {
 
         // ボスフラグ
         this.isBoss = stats.isBoss || false;
+
+        // 貫通弾を止める能力
+        this.blocksPierce = stats.blocksPierce || false;
     }
 
     getStats(type) {
@@ -67,13 +70,14 @@ class Enemy extends Entity {
             },
             assassin: {
                 hp: 5,
-                speed: 120,
+                speed: 80, // fastと同じ速度
                 damage: 8,
                 expValue: 2,
                 scoreValue: 25,
                 size: 10,
                 color: '#ff00ff',
-                shape: 'triangle'
+                shape: 'triangle',
+                blocksPierce: true // 貫通弾を止める
             },
             tank: {
                 hp: 40,
