@@ -27,11 +27,15 @@
 body {
     background: var(--bg-darker);
     min-height: 100vh;
+    min-height: 100dvh;
+    /* Safari対応 */
     display: flex;
     justify-content: center;
     align-items: center;
     font-family: 'Press Start 2P', cursive;
     overflow: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+    /* iPhoneセーフエリア */
 }
 
 #game-container {
