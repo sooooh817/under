@@ -92,22 +92,20 @@ class ElectricShock extends Skill {
                 this.cooldown = 0.75;
                 break;
             case 5:
-                this.pierce = 1;
-                this.projectileCount = 3;
+                this.projectileCount = 3; // 貫通削除、弾数3まで
                 break;
             case 6:
                 this.damage = 22; // 17+5
                 this.cooldown = 0.5;
                 break;
             case 7:
-                this.projectileCount = 4;
-                this.pierce = 2;
+                this.cooldown = 0.4; // 弾数増加削除、CD短縮に変更
                 break;
             case 8:
-                // 威力+6, 弾速UP (800は早すぎて射程伸びすぎるので削除)
-                this.damage = 29; // 22+7
-                this.cooldown = 0.5;
-                this.projectileSpeed = 700; // 600->800->700
+                // 威力調整（29->25）
+                this.damage = 25;
+                this.cooldown = 0.35;
+                this.projectileSpeed = 700;
                 break;
         }
     }
@@ -120,10 +118,10 @@ class ElectricShock extends Skill {
             case 2: return '威力+2, CD-0.1秒';
             case 3: return '発射数+1';
             case 4: return '威力+4, CD-0.15秒';
-            case 5: return '貫通+1, 発射数+1';
+            case 5: return '発射数+1';
             case 6: return '威力+4, CD-0.25秒';
-            case 7: return '発射数+1, 貫通+1';
-            case 8: return '威力+6, 弾速UP';
+            case 7: return 'CD-0.1秒';
+            case 8: return '威力+3, 弾速UP, CD-0.05秒';
             default: return '';
         }
     }
