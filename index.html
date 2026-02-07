@@ -52,6 +52,12 @@
                     </button>
                 </div>
             </div>
+            <!-- プレイヤー名入力 -->
+            <div class="player-name-input">
+                <label for="playerName">プレイヤー名</label>
+                <input type="text" id="playerName" maxlength="10" placeholder="名無し">
+            </div>
+
             <button id="startBtn" class="start-btn">ゲームスタート</button>
 
             <!-- Volume Control -->
@@ -95,9 +101,14 @@
     </div>
 
     <!-- Scripts -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <script src="js/utils/Vector2.js"></script>
     <script src="js/systems/SpriteManager.js"></script>
     <script src="js/systems/SoundManager.js"></script>
+    <script src="js/systems/FirebaseManager.js"></script>
     <script src="js/systems/InputManager.js"></script>
     <script src="js/entities/Entity.js"></script>
     <script src="js/entities/Player.js"></script>

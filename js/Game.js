@@ -70,6 +70,11 @@ class Game {
 
         // ゲーム開始
         startBtn.addEventListener('click', () => {
+            // プレイヤー名を保存
+            const playerNameInput = document.getElementById('playerName');
+            const playerName = playerNameInput ? playerNameInput.value.trim() || '名無し' : '名無し';
+            localStorage.setItem('pocketSurvivorPlayerName', playerName);
+
             startScreen.classList.add('hidden');
             this.startGame();
         });
@@ -136,28 +141,51 @@ class Game {
         }
     }
 
-    // ランキング関連メソッド
+    // ランキング関連メソッド（ローカル保存も残す）
     getRankings() {
         const data = localStorage.getItem('pocketSurvivorRankings');
         return data ? JSON.parse(data) : [];
     }
 
     saveToRankings(score) {
+        // ローカルにも保存
         let rankings = this.getRankings();
         rankings.push({
             score: score,
             date: new Date().toLocaleDateString('ja-JP')
         });
-        // スコア順にソートしてトップ10を保存
         rankings.sort((a, b) => b.score - a.score);
         rankings = rankings.slice(0, 10);
         localStorage.setItem('pocketSurvivorRankings', JSON.stringify(rankings));
+
+        // Firebaseにも保存（プレイヤー名を取得）
+        const playerName = localStorage.getItem('pocketSurvivorPlayerName') || '名無し';
+        if (firebaseManager && firebaseManager.initialized) {
+            firebaseManager.saveScore(playerName, score, this.gameTime, this.player.level);
+        }
+
         return rankings;
     }
 
-    showRanking() {
+    async showRanking() {
         const list = document.getElementById('ranking-list');
-        const rankings = this.getRankings();
+        list.innerHTML = '<li class="no-records">読み込み中...</li>';
+
+        // Firebaseから取得を試みる
+        let rankings = [];
+        if (firebaseManager && firebaseManager.initialized) {
+            rankings = await firebaseManager.getTopRankings(10);
+        }
+
+        // Firebaseが使えない場合はローカルから
+        if (rankings.length === 0) {
+            rankings = this.getRankings().map(r => ({
+                playerName: 'あなた',
+                score: r.score,
+                survivalTime: 0,
+                level: 0
+            }));
+        }
 
         if (rankings.length === 0) {
             list.innerHTML = '<li class="no-records">まだ記録がありません</li>';
@@ -167,8 +195,8 @@ class Game {
         list.innerHTML = rankings.map((r, i) => `
             <li>
                 <span class="rank">${i + 1}位</span>
+                <span class="name">${r.playerName || '名無し'}</span>
                 <span class="score">${r.score}</span>
-                <span class="date">${r.date || ''}</span>
             </li>
         `).join('');
     }
