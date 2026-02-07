@@ -214,6 +214,7 @@ class Game {
         this.damageTexts = [];
         this.gameTime = 0;
         this.killCount = 0;
+        this.score = 0;
 
         // プレイヤー生成
         this.player = new Player(
