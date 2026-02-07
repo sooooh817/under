@@ -38,6 +38,9 @@ class Enemy extends Entity {
         // スパイダー用
         this.distanceTraveled = 0;
         this.webDropThreshold = 200; // 5体分 (約40px * 5)
+
+        // ボスフラグ
+        this.isBoss = stats.isBoss || false;
     }
 
     getStats(type) {
