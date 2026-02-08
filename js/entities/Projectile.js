@@ -220,6 +220,11 @@ class Projectile extends Entity {
 
         this.hitEnemies.add(enemy);
 
+        // アサシン等の貫通ブロック能力をチェック
+        if (enemy.blocksPierce) {
+            this.pierce = 0;
+        }
+
         // 貫通チェック
         if (this.pierce <= 0) {
             this.destroy();
