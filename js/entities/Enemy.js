@@ -144,7 +144,7 @@ class Enemy extends Entity {
                 hp: 13,
                 speed: 35,
                 damage: 5,
-                expValue: 3,
+                expValue: 5,
                 scoreValue: 30,
                 size: 16,
                 color: '#cc44ff',
