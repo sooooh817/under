@@ -474,7 +474,13 @@ class Game {
 
         // ボス撃破時はSpawnerに通知
         if (enemy.isBoss) {
-            this.spawner.onBossKilled();
+            this.spawner.onBossKilled(enemy);
+
+            // ラスボス撃破時はゲームクリア
+            if (this.spawner.finalBossKilled) {
+                this.gameClear();
+                return;
+            }
         }
 
         // 経験値ジェムをドロップ
@@ -612,6 +618,38 @@ class Game {
         gameOverScreen.classList.remove('hidden');
 
         // BGM切り替え
+        soundManager.playBGM('bgm_gameover');
+    }
+
+    gameClear() {
+        this.state = 'gameOver';
+
+        // スコアボーナス
+        this.score += 5000;
+
+        // ハイスコア更新
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('pocketSurvivorHighScore', this.highScore);
+        }
+
+        this.saveToRankings(this.score);
+
+        const gameOverScreen = document.getElementById('game-over-screen');
+        document.getElementById('final-time').textContent = this.formatTime(this.gameTime);
+        document.getElementById('final-kills').textContent = this.killCount;
+        document.getElementById('final-level').textContent = this.player.level;
+
+        const scoreEl = document.getElementById('final-score');
+        const highScoreEl = document.getElementById('final-highscore');
+        if (scoreEl) scoreEl.textContent = this.score;
+        if (highScoreEl) highScoreEl.textContent = this.highScore;
+
+        // ゲームクリア表示に変更
+        const titleEl = gameOverScreen.querySelector('h2');
+        if (titleEl) titleEl.textContent = '🌟 GAME CLEAR! 🌟';
+
+        gameOverScreen.classList.remove('hidden');
         soundManager.playBGM('bgm_gameover');
     }
 

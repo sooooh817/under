@@ -104,6 +104,21 @@ class Enemy extends Entity {
                 bulletCount: 13,
                 isBoss: true
             },
+            final_boss: {
+                hp: 400,
+                speed: 30,
+                damage: 30,
+                expValue: 100,
+                scoreValue: 2000,
+                size: 55,
+                color: '#ffdd44',
+                shape: 'circle',
+                shootInterval: 0.3,
+                shootRange: 500,
+                projectileDamage: 15,
+                bulletCount: 16,
+                isBoss: true
+            },
             ranged: {
                 hp: 13,
                 speed: 35,

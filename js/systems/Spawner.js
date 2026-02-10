@@ -12,9 +12,12 @@ class Spawner {
         // 難易度スケーリング
         this.difficultyMultiplier = 1;
         this.bossSpawned = false;
-        this.lastBossTime = 0;
-        this.bossInterval = 240; // 4分ごと (225->240)
+        this.lastBossTime = 60; // 初回ボス: 60+180=240秒(4分)
+        this.bossInterval = 180; // 3分ごと (1回目:4分, 2回目:7分, 3回目:10分...)
         this.bossKillCount = 0; // ボス撃破数
+        this.maxBossCount = 3; // 最大ボス出現回数
+        this.bossSpawnCount = 0; // ボス出現回数
+        this.finalBossKilled = false; // ラスボス撃破フラグ
     }
 
     update(deltaTime, gameTime, enemies, player) {
@@ -32,9 +35,10 @@ class Spawner {
         }
 
         // ボススポーン（5分ごと）
-        if (gameTime - this.lastBossTime >= this.bossInterval) {
+        if (this.bossSpawnCount < this.maxBossCount && gameTime - this.lastBossTime >= this.bossInterval) {
             this.spawnBoss(enemies, player);
             this.lastBossTime = gameTime;
+            this.bossSpawnCount++;
         }
     }
 
@@ -57,7 +61,9 @@ class Spawner {
     spawnBoss(enemies, player) {
         const spawnPos = this.getSpawnPosition(player.position);
 
-        const boss = new Enemy(spawnPos.x, spawnPos.y, 'boss');
+        // 3回目はラスボス
+        const bossType = (this.bossSpawnCount >= this.maxBossCount - 1) ? 'final_boss' : 'boss';
+        const boss = new Enemy(spawnPos.x, spawnPos.y, bossType);
 
         // ボスの難易度スケーリング
         boss.hp = Math.floor(boss.hp * this.difficultyMultiplier * 1.5);
@@ -118,7 +124,10 @@ class Spawner {
         }
     }
 
-    onBossKilled() {
+    onBossKilled(enemy) {
         this.bossKillCount++;
+        if (enemy && enemy.type === 'final_boss') {
+            this.finalBossKilled = true;
+        }
     }
 }
