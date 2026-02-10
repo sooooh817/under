@@ -193,20 +193,30 @@ class Enemy extends Entity {
     update(deltaTime, playerPosition, game) {
         // スタン時間の更新
         if (this.stunTime > 0) {
-            this.stunTime -= deltaTime;
-            // フラッシュタイマー更新（スタン中も継続）
-            if (this.flashTime > 0) {
-                this.flashTime -= deltaTime;
+            // 状態異常無効なら即解除
+            if (this.preventStatus) {
+                this.stunTime = 0;
+            } else {
+                this.stunTime -= deltaTime;
+                // フラッシュタイマー更新（スタン中も継続）
+                if (this.flashTime > 0) {
+                    this.flashTime -= deltaTime;
+                }
+                return; // スタン中は移動・攻撃しない
             }
-            return; // スタン中は移動・攻撃しない
         }
 
         // ノックバック処理
         if (this.knockbackVelocity.magnitude > 0) {
-            this.position = this.position.add(this.knockbackVelocity.multiply(deltaTime));
-            this.knockbackVelocity = this.knockbackVelocity.multiply(1 - this.knockbackDecay * deltaTime);
-            if (this.knockbackVelocity.magnitude < 1) {
+            // 状態異常無効なら即解除
+            if (this.preventStatus) {
                 this.knockbackVelocity = Vector2.zero;
+            } else {
+                this.position = this.position.add(this.knockbackVelocity.multiply(deltaTime));
+                this.knockbackVelocity = this.knockbackVelocity.multiply(1 - this.knockbackDecay * deltaTime);
+                if (this.knockbackVelocity.magnitude < 1) {
+                    this.knockbackVelocity = Vector2.zero;
+                }
             }
         }
 
