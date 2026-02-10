@@ -46,6 +46,7 @@ class Enemy extends Entity {
         // ボスフラグ
         this.isBoss = stats.isBoss || false;
 
+        this.preventStatus = stats.preventStatus || false;
         // 貫通弾を止める能力
         this.blocksPierce = stats.blocksPierce || false;
     }
@@ -121,7 +122,8 @@ class Enemy extends Entity {
                 shootRange: 400,
                 projectileDamage: 12,
                 bulletCount: 13,
-                isBoss: true
+                isBoss: true,
+                preventStatus: true // 状態異常無効
             },
             final_boss: {
                 hp: 2000,
@@ -138,7 +140,8 @@ class Enemy extends Entity {
                 bulletCount: 16,
                 isBoss: true,
                 summonInterval: 10,
-                summonCount: 5
+                summonCount: 5,
+                preventStatus: true // 状態異常無効
             },
             ranged: {
                 hp: 13,
@@ -599,7 +602,7 @@ class Enemy extends Entity {
                     ctx.stroke();
 
                     // ボス用の目
-                    if (this.type === 'boss') {
+                    if (this.isBoss) {
                         ctx.fillStyle = '#ffff00';
                         ctx.beginPath();
                         ctx.arc(x - s / 3, y - s / 4, s / 6, 0, Math.PI * 2);
@@ -641,7 +644,7 @@ class Enemy extends Entity {
         }
 
         // HPバー（ボスのみ）
-        if (this.type === 'boss') {
+        if (this.isBoss) {
             const barWidth = s * 2.5;
             const barHeight = 6;
             const barX = x - barWidth / 2;
@@ -665,12 +668,12 @@ class Enemy extends Entity {
         this.hp -= amount;
         this.flashTime = 0.1;
 
-        if (knockbackDir && knockbackForce > 0) {
+        if (knockbackDir && knockbackForce > 0 && !this.preventStatus) {
             this.knockbackVelocity = knockbackDir.multiply(knockbackForce);
         }
 
         // スタン効果を適用
-        if (stunDuration > 0) {
+        if (stunDuration > 0 && !this.preventStatus) {
             this.stunTime = Math.max(this.stunTime, stunDuration);
         }
 
