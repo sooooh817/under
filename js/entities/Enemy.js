@@ -277,16 +277,16 @@ class Enemy extends Entity {
 
         switch (pattern) {
             case 0:
-                // 放射状弾幕 - 全方向に16発
-                this.shootRadial(game, 16);
+                // 放射状弾幕 - 全方向に12発
+                this.shootRadial(game, 12);
                 break;
             case 1:
-                // 渦巻き弾幕 - 螺旋状に24発
-                this.shootSpiral(game, 24);
+                // 渦巻き弾幕 - 螺旋状に4発
+                this.shootSpiral(game, 4);
                 break;
             case 2:
-                // 狙い撃ち弾幕 - プレイヤー方向に5発扇状
-                this.shootSpread(direction, game, 5);
+                // 狙い撃ち弾幕 - プレイヤー方向に4発扇状
+                this.shootSpread(direction, game, 4);
                 break;
         }
     }
@@ -302,7 +302,7 @@ class Enemy extends Entity {
 
             const projectile = new EnemyProjectile(this.position.x, this.position.y, {
                 damage: this.projectileDamage,
-                speed: 150,
+                speed: 140,
                 direction: dir,
                 size: 8,
                 color: '#ff3333',
@@ -318,15 +318,15 @@ class Enemy extends Entity {
         const spiralOffset = this.spiralAngle || 0;
         this.spiralAngle = (spiralOffset + 0.3) % (Math.PI * 2);
 
-        const angleStep = (Math.PI * 2) / 6; // 8方向 -> 6方向
+        const angleStep = (Math.PI * 2) / 4; // 4方向
 
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 4; i++) {
             const angle = spiralOffset + angleStep * i;
             const dir = new Vector2(Math.cos(angle), Math.sin(angle));
 
             const projectile = new EnemyProjectile(this.position.x, this.position.y, {
                 damage: this.projectileDamage,
-                speed: 120,
+                speed: 110,
                 direction: dir,
                 size: 6,
                 color: '#ffaa00',
@@ -350,7 +350,7 @@ class Enemy extends Entity {
 
             const projectile = new EnemyProjectile(this.position.x, this.position.y, {
                 damage: this.projectileDamage * 1.2,
-                speed: 200,
+                speed: 180,
                 direction: dir,
                 size: 10,
                 color: '#ff00ff',
