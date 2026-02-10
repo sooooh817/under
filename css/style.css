@@ -362,6 +362,102 @@ body {
 }
 
 /* ===================================
+   ゲームクリア画面
+   =================================== */
+
+#game-clear-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 0, 20, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    z-index: 100;
+    overflow: hidden;
+}
+
+#game-clear-screen h1 {
+    color: var(--primary);
+    font-size: 36px;
+    text-shadow:
+        0 0 20px var(--primary-glow),
+        0 0 40px rgba(255, 215, 0, 0.4);
+    animation: clearPulse 2s ease-in-out infinite;
+    z-index: 10;
+}
+
+@keyframes clearPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.character-celebration {
+    margin: 20px 0;
+    animation: jump 0.8s ease-out infinite alternate;
+    z-index: 10;
+}
+
+.character-celebration img {
+    width: 96px;
+    height: 96px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+}
+
+@keyframes jump {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-30px);
+    }
+}
+
+#confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.confetti {
+    position: absolute;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(650px) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* ===================================
    ポーズ画面
    =================================== */
 

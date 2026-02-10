@@ -90,6 +90,21 @@ class Game {
             this.state = 'menu';
         });
 
+        // ゲームクリアからのリスタート
+        const clearRestartBtn = document.getElementById('clear-restartBtn');
+        const gameClearScreen = document.getElementById('game-clear-screen');
+        if (clearRestartBtn) {
+            clearRestartBtn.addEventListener('click', () => {
+                gameClearScreen.classList.add('hidden');
+                soundManager.playBGM('bgm_title');
+                startScreen.classList.remove('hidden');
+                this.state = 'menu';
+                // 紙吹雪をクリア
+                const container = document.getElementById('confetti-container');
+                if (container) container.innerHTML = '';
+            });
+        }
+
         // ポーズ関連
         const resumeBtn = document.getElementById('resumeBtn');
         const quitBtn = document.getElementById('quitBtn');
@@ -622,7 +637,7 @@ class Game {
     }
 
     gameClear() {
-        this.state = 'gameOver';
+        this.state = 'gameOver'; // 状態はgameOver扱い（操作不能）
 
         // スコアボーナス
         this.score += 5000;
@@ -635,22 +650,48 @@ class Game {
 
         this.saveToRankings(this.score);
 
-        const gameOverScreen = document.getElementById('game-over-screen');
-        document.getElementById('final-time').textContent = this.formatTime(this.gameTime);
-        document.getElementById('final-kills').textContent = this.killCount;
-        document.getElementById('final-level').textContent = this.player.level;
+        const gameClearScreen = document.getElementById('game-clear-screen');
+        document.getElementById('clear-time').textContent = this.formatTime(this.gameTime);
+        document.getElementById('clear-kills').textContent = this.killCount;
+        document.getElementById('clear-level').textContent = this.player.level;
 
-        const scoreEl = document.getElementById('final-score');
-        const highScoreEl = document.getElementById('final-highscore');
+        const scoreEl = document.getElementById('clear-score');
+        const highScoreEl = document.getElementById('clear-highscore');
         if (scoreEl) scoreEl.textContent = this.score;
         if (highScoreEl) highScoreEl.textContent = this.highScore;
 
-        // ゲームクリア表示に変更
-        const titleEl = gameOverScreen.querySelector('h2');
-        if (titleEl) titleEl.textContent = '🌟 GAME CLEAR! 🌟';
+        // キャラクター画像を設定
+        const charImg = document.getElementById('clear-char-img');
+        if (charImg) {
+            charImg.src = `assets/sprites/player_${this.player.type}.png`;
+        }
 
-        gameOverScreen.classList.remove('hidden');
-        soundManager.playBGM('bgm_gameover');
+        gameClearScreen.classList.remove('hidden');
+        soundManager.playBGM('bgm_gameover'); // 勝利用BGMがあればそれに変更
+
+        // 紙吹雪開始
+        this.createConfetti();
+    }
+
+    createConfetti() {
+        const container = document.getElementById('confetti-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+        const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d'];
+
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+
+            // ランダムな位置、色、遅延
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.animationDuration = (Math.random() * 2 + 2) + 's'; // 2-4秒
+
+            container.appendChild(confetti);
+        }
     }
 
     formatTime(seconds) {
@@ -798,52 +839,21 @@ class Game {
             }
 
             // 外側のグロー
-            const gradient = this.ctx.createRadialGradient(
-                flame.x, flame.y, 0,
-                flame.x, flame.y, flame.range
-            );
-            gradient.addColorStop(0, colorOuter);
-            gradient.addColorStop(0.5, colorMid);
-            gradient.addColorStop(1, `rgba(0, 0, 0, 0)`);
-
-            this.ctx.fillStyle = gradient;
             this.ctx.beginPath();
             this.ctx.arc(flame.x, flame.y, flame.range, 0, Math.PI * 2);
-            this.ctx.fill();
-
-            // 内側の炎
-            this.ctx.fillStyle = colorInner;
-            this.ctx.beginPath();
-            this.ctx.arc(flame.x, flame.y, flame.range * 0.4, 0, Math.PI * 2);
+            this.ctx.fillStyle = colorOuter;
             this.ctx.fill();
         }
     }
 
-    drawEffects() {
-        for (const effect of this.effects) {
-            if (effect.type === 'shockwave') {
-                const alpha = 1 - (effect.time / effect.duration);
-
-                this.ctx.strokeStyle = `rgba(100, 255, 200, ${alpha})`;
-                this.ctx.lineWidth = 4;
-                this.ctx.beginPath();
-                this.ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
-                this.ctx.stroke();
-
-                // 内側の波紋
-                this.ctx.strokeStyle = `rgba(200, 255, 230, ${alpha * 0.5})`;
-                this.ctx.lineWidth = 2;
-                this.ctx.beginPath();
-                this.ctx.arc(effect.x, effect.y, effect.radius * 0.7, 0, Math.PI * 2);
-                this.ctx.stroke();
-            }
-        }
+    showDamage(x, y, damage, isCritical) {
+        this.damageTexts.push(new DamageText(x, y, damage, isCritical));
     }
+
     updateDamageTexts(deltaTime) {
         for (let i = this.damageTexts.length - 1; i >= 0; i--) {
-            const text = this.damageTexts[i];
-            text.update(deltaTime);
-            if (text.time >= text.lifeTime) {
+            this.damageTexts[i].update(deltaTime);
+            if (!this.damageTexts[i].active) {
                 this.damageTexts.splice(i, 1);
             }
         }
@@ -852,29 +862,6 @@ class Game {
     drawDamageTexts() {
         for (const text of this.damageTexts) {
             text.draw(this.ctx);
-        }
-    }
-
-    showDamage(x, y, amount, isCritical) {
-        // 少し位置をずらす
-        const offsetX = (Math.random() - 0.5) * 20;
-        const offsetY = (Math.random() - 0.5) * 20;
-        this.damageTexts.push(new DamageText(x + offsetX, y + offsetY, amount, isCritical));
-    }
-    togglePause() {
-        if (this.state === 'playing') {
-            this.state = 'paused';
-            document.getElementById('pause-screen').classList.remove('hidden');
-            soundManager.playSE('se_ui_click'); // 仮の音
-            // BGM一時停止
-            soundManager.pauseBGM();
-        } else if (this.state === 'paused') {
-            this.state = 'playing';
-            document.getElementById('pause-screen').classList.add('hidden');
-            this.lastTime = performance.now(); // デルタタイムのリセット
-            soundManager.playSE('se_ui_click');
-            // BGM再開
-            soundManager.resumeBGM();
         }
     }
 }
