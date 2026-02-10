@@ -49,7 +49,7 @@ class Enemy extends Entity {
     getStats(type) {
         const stats = {
             normal: {
-                hp: 10,
+                hp: 8,
                 speed: 50,
                 damage: 5,
                 expValue: 1,
@@ -105,7 +105,7 @@ class Enemy extends Entity {
                 isBoss: true
             },
             ranged: {
-                hp: 14, // 13->14
+                hp: 13,
                 speed: 35,
                 damage: 5,
                 expValue: 3,
@@ -118,7 +118,7 @@ class Enemy extends Entity {
                 projectileDamage: 8
             },
             spider: {
-                hp: 5, // 25 -> 5
+                hp: 13,
                 speed: 40,
                 damage: 8,
                 expValue: 4,

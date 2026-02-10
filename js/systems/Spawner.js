@@ -20,6 +20,7 @@ class Spawner {
     update(deltaTime, gameTime, enemies, player) {
         // 難易度上昇（時間経過で敵が強く、多くなる）
         this.difficultyMultiplier = 1 + Math.floor(gameTime / 30) * 0.2;
+        this.gameTime = gameTime;
         this.spawnInterval = Math.max(0.3, this.baseSpawnInterval - gameTime / 180);
 
         this.spawnTimer += deltaTime;
@@ -106,11 +107,11 @@ class Spawner {
             return 'bomber';
         } else if (time >= 1.6 && rand < 0.15) { // Tank: 1分30秒 (time >= 1.6)
             return 'tank';
-        } else if (time >= 1.3 && rand < 0.25) { // Spider: 1分頃から (2.0 -> 1.3へ変更)
+        } else if (this.gameTime >= 30 && rand < 0.25) { // Spider: 30秒以降
             return 'spider';
-        } else if (rand < 0.35) { // Ranged: 最初から
+        } else if (this.gameTime >= 40 && rand < 0.35) { // Ranged: 40秒以降
             return 'ranged';
-        } else if (rand < 0.45) { // Fast: 最初から
+        } else if (this.gameTime >= 30 && rand < 0.45) { // Fast: 30秒以降
             return 'fast';
         } else {
             return 'normal';
