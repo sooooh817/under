@@ -35,9 +35,13 @@ class Enemy extends Entity {
         // スタン（痺れ）状態
         this.stunTime = 0;
 
-        // スパイダー用
+        // ラスボス召喚用
+        this.summonTimer = 0;
+        this.summonInterval = stats.summonInterval || 0;
+        this.summonCount = stats.summonCount || 0;
+
+        // ミニボマー/ボマー用
         this.distanceTraveled = 0;
-        this.webDropThreshold = 200; // 5体分 (約40px * 5)
 
         // ボスフラグ
         this.isBoss = stats.isBoss || false;
@@ -104,8 +108,23 @@ class Enemy extends Entity {
                 bulletCount: 13,
                 isBoss: true
             },
+            boss2: {
+                hp: 160,
+                speed: 25,
+                damage: 25,
+                expValue: 50,
+                scoreValue: 500,
+                size: 45,
+                color: '#cc3333',
+                shape: 'circle',
+                shootInterval: 0.4,
+                shootRange: 400,
+                projectileDamage: 12,
+                bulletCount: 13,
+                isBoss: true
+            },
             final_boss: {
-                hp: 400,
+                hp: 2000,
                 speed: 30,
                 damage: 30,
                 expValue: 100,
@@ -117,7 +136,9 @@ class Enemy extends Entity {
                 shootRange: 500,
                 projectileDamage: 15,
                 bulletCount: 16,
-                isBoss: true
+                isBoss: true,
+                summonInterval: 10,
+                summonCount: 5
             },
             ranged: {
                 hp: 13,
@@ -144,7 +165,7 @@ class Enemy extends Entity {
                 shootInterval: 0,
                 shootRange: 9999,
                 projectileDamage: 4,
-                bulletCount: 3,
+                bulletCount: 4,
                 shootDistance: 100
             },
             bomber: {
@@ -190,7 +211,7 @@ class Enemy extends Entity {
         const direction = playerPosition.subtract(this.position).normalized;
 
         // ボスの場合：常に移動しながら弾幕攻撃
-        if (this.type === 'boss') {
+        if (this.isBoss) {
             // 移動
             this.position = this.position.add(direction.multiply(this.speed * deltaTime));
 
@@ -200,6 +221,15 @@ class Enemy extends Entity {
                 if (this.shootTimer >= this.shootInterval) {
                     this.shootTimer = 0;
                     this.shootBarrage(direction, game);
+                }
+            }
+
+            // ラスボス：ミニボマー召喚
+            if (this.type === 'final_boss' && this.summonInterval > 0) {
+                this.summonTimer += deltaTime;
+                if (this.summonTimer >= this.summonInterval) {
+                    this.summonTimer = 0;
+                    this.summonMiniBombers(game);
                 }
             }
         }
@@ -272,21 +302,27 @@ class Enemy extends Entity {
     shootBarrage(direction, game) {
         if (!game || !game.enemyProjectiles) return;
 
+        // ボスタイプ別の弾幕パラメータ
+        let radialCount, spiralCount, spreadCount;
+        if (this.type === 'boss') {
+            radialCount = 12; spiralCount = 4; spreadCount = 4;
+        } else {
+            // boss2, final_bossは元の強さ
+            radialCount = 16; spiralCount = 6; spreadCount = 5;
+        }
+
         // 弾幕パターンをランダムに選択
         const pattern = Math.floor(Math.random() * 3);
 
         switch (pattern) {
             case 0:
-                // 放射状弾幕 - 全方向に12発
-                this.shootRadial(game, 12);
+                this.shootRadial(game, radialCount);
                 break;
             case 1:
-                // 渦巻き弾幕 - 螺旋状に4発
-                this.shootSpiral(game, 4);
+                this.shootSpiral(game, spiralCount);
                 break;
             case 2:
-                // 狙い撃ち弾幕 - プレイヤー方向に4発扇状
-                this.shootSpread(direction, game, 4);
+                this.shootSpread(direction, game, spreadCount);
                 break;
         }
     }
@@ -358,6 +394,21 @@ class Enemy extends Entity {
             });
 
             game.enemyProjectiles.push(projectile);
+        }
+    }
+
+    // ラスボス用：ミニボマー召喚
+    summonMiniBombers(game) {
+        if (!game || !game.enemies) return;
+
+        for (let i = 0; i < this.summonCount; i++) {
+            const angle = (Math.PI * 2 / this.summonCount) * i;
+            const dist = 80 + Math.random() * 40;
+            const x = this.position.x + Math.cos(angle) * dist;
+            const y = this.position.y + Math.sin(angle) * dist;
+
+            const miniBomber = new Enemy(x, y, 'spider');
+            game.enemies.push(miniBomber);
         }
     }
 

@@ -30,6 +30,7 @@ class SpriteManager {
                 { name: 'enemy_spider', path: 'assets/sprites/enemy_spider.png' },
                 { name: 'enemy_assassin', path: 'assets/sprites/enemy_assassin.png' },
                 { name: 'enemy_bomber', path: 'assets/sprites/enemy_bomber.png' },
+                { name: 'enemy_boss2', path: 'assets/sprites/enemy_boss.png' },
                 { name: 'enemy_final_boss', path: 'assets/sprites/enemy_final_boss.png' },
             ];
 

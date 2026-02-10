@@ -520,7 +520,7 @@ class Game {
 
         let killCount = 0;
         for (const enemy of this.enemies) {
-            if (enemy.active && enemy.type !== 'boss') { // ボスには無効
+            if (enemy.active && !enemy.isBoss) { // ボス系は全て無効
                 enemy.takeDamage(9999);
                 this.onEnemyKilled(enemy);
                 killCount++;

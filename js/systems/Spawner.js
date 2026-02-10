@@ -28,8 +28,8 @@ class Spawner {
 
         this.spawnTimer += deltaTime;
 
-        // 通常敵のスポーン
-        if (this.spawnTimer >= this.spawnInterval) {
+        // 通常敵のスポーン（9分55秒以降は停止）
+        if (this.spawnTimer >= this.spawnInterval && gameTime < 595) {
             this.spawnTimer = 0;
             this.spawnEnemy(enemies, player);
         }
@@ -61,8 +61,15 @@ class Spawner {
     spawnBoss(enemies, player) {
         const spawnPos = this.getSpawnPosition(player.position);
 
-        // 3回目はラスボス
-        const bossType = (this.bossSpawnCount >= this.maxBossCount - 1) ? 'final_boss' : 'boss';
+        // 1回目=boss, 2回目=boss2, 3回目=final_boss
+        let bossType;
+        if (this.bossSpawnCount >= this.maxBossCount - 1) {
+            bossType = 'final_boss';
+        } else if (this.bossSpawnCount >= 1) {
+            bossType = 'boss2';
+        } else {
+            bossType = 'boss';
+        }
         const boss = new Enemy(spawnPos.x, spawnPos.y, bossType);
 
         // ボスの難易度スケーリング
@@ -105,8 +112,8 @@ class Spawner {
         const rand = Math.random();
         const time = this.difficultyMultiplier;
 
-        // ボス撃破後はミニボマー(spider)出現
-        if (this.bossKillCount >= 1 && rand < 0.12) {
+        // 3分経過でミニボマー(spider)出現
+        if (this.gameTime >= 180 && rand < 0.12) {
             return 'spider';
             // 2回目ボス撃破後はボマー出現
         } else if (this.bossKillCount >= 2 && rand < 0.20) {
