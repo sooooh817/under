@@ -109,7 +109,7 @@ class Spawner {
             return 'tank';
         } else if (this.gameTime >= 30 && rand < 0.25) { // Spider: 30秒以降
             return 'spider';
-        } else if (this.gameTime >= 40 && rand < 0.35) { // Ranged: 40秒以降
+        } else if (this.gameTime >= 15 && rand < 0.35) { // Ranged: 15秒以降
             return 'ranged';
         } else if (this.gameTime >= 30 && rand < 0.45) { // Fast: 30秒以降
             return 'fast';

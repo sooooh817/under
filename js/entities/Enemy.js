@@ -124,8 +124,13 @@ class Enemy extends Entity {
                 expValue: 4,
                 scoreValue: 25,
                 size: 18,
-                color: '#444444',
-                shape: 'pentagon' // 新しい形状（五角形）または既存ので代用
+                color: '#666699',
+                shape: 'pentagon',
+                shootInterval: 0,
+                shootRange: 9999,
+                projectileDamage: 4,
+                bulletCount: 3,
+                shootDistance: 100
             },
             bomber: {
                 hp: 70,
@@ -203,14 +208,15 @@ class Enemy extends Entity {
                 return;
             }
         } else if (this.type === 'spider') {
-            // スパイダー：移動距離に応じてウェブを設置
+            // ミニボマー：移動距離に応じてランダム方向に3発弾を発射
             const moveAmount = this.speed * deltaTime;
             this.position = this.position.add(direction.multiply(moveAmount));
 
             this.distanceTraveled += moveAmount;
-            if (this.distanceTraveled >= this.webDropThreshold) {
+            const shootDist = this.getStats(this.type).shootDistance || 100;
+            if (this.distanceTraveled >= shootDist) {
                 this.distanceTraveled = 0;
-                this.dropWeb(game);
+                this.shootRandomDirections(game);
             }
         } else if (this.type === 'bomber') {
             // ボマー：移動距離に応じて全方向に弾幕発射
@@ -334,6 +340,30 @@ class Enemy extends Entity {
                 size: 10,
                 color: '#ff00ff',
                 lifetime: 5
+            });
+
+            game.enemyProjectiles.push(projectile);
+        }
+    }
+
+    // ミニボマー(spider)用：ランダム方向に弾を発射
+    shootRandomDirections(game) {
+        if (!game || !game.enemyProjectiles) return;
+
+        const stats = this.getStats(this.type);
+        const bulletCount = stats.bulletCount || 3;
+
+        for (let i = 0; i < bulletCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dir = new Vector2(Math.cos(angle), Math.sin(angle));
+
+            const projectile = new EnemyProjectile(this.position.x, this.position.y, {
+                damage: this.projectileDamage,
+                speed: 120,
+                direction: dir,
+                size: 5,
+                color: '#666699',
+                lifetime: 4
             });
 
             game.enemyProjectiles.push(projectile);
