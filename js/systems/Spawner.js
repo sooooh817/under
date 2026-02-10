@@ -105,17 +105,17 @@ class Spawner {
         const rand = Math.random();
         const time = this.difficultyMultiplier;
 
-        // ボス撃破後はアサシン出現
+        // ボス撃破後はミニボマー(spider)出現
         if (this.bossKillCount >= 1 && rand < 0.12) {
-            return 'assassin';
+            return 'spider';
             // 2回目ボス撃破後はボマー出現
         } else if (this.bossKillCount >= 2 && rand < 0.20) {
             return 'bomber';
-        } else if (time >= 1.6 && rand < 0.15) { // Tank: 1分30秒 (time >= 1.6)
+        } else if (this.gameTime >= 120 && rand < 0.15) { // Tank: 2分以降
             return 'tank';
-        } else if (this.gameTime >= 30 && rand < 0.25) { // Spider: 30秒以降
-            return 'spider';
-        } else if (this.gameTime >= 15 && rand < 0.35) { // Ranged: 15秒以降
+        } else if (this.gameTime >= 90 && rand < 0.25) { // Assassin: 1分30秒以降
+            return 'assassin';
+        } else if (this.gameTime >= 45 && rand < 0.35) { // Ranged: 45秒以降
             return 'ranged';
         } else if (this.gameTime >= 30 && rand < 0.45) { // Fast: 30秒以降
             return 'fast';
