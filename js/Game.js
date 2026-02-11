@@ -32,7 +32,6 @@ class Game {
         this.flames = [];
         this.effects = [];
         this.damageTexts = [];
-        this.maxDamageTexts = 30; // 画面上のダメージ数字の最大数（描画負荷軽減）
 
         // ゲーム統計
         this.gameTime = 0;
@@ -246,6 +245,7 @@ class Game {
         this.expGems = [];
         this.items = [];
         this.flames = [];
+        this.flames = [];
         this.effects = [];
         this.damageTexts = [];
         this.maxDamageTexts = 30; // 画面上のダメージ数字の最大数（描画負荷軽減）
@@ -315,11 +315,17 @@ class Game {
             }
         }
 
-        // 弾描画（この処理はdrawメソッドに移動すべきですが、カリングロジックの意図としてここに残っている可能性があります。ただし通常はdrawで行います）
-        // updateメソッド内での描画ループは本来不要です。drawメソッドのみで描画を行います。
-        // ここでのループはupdate処理のみを行うべきですが、リファクタリングの過程で描画ロジックが混在しているようです。
-        // 今回の変更ではdrawメソッドにカリングを追加したので、ここはupdateのみであることを確認します。
-        // （コードを確認すると、updateメソッド内には弾のdraw呼び出しはありません。drawメソッドを見てみます）
+        // 弾描画
+        for (const projectile of this.projectiles) {
+            if (projectile.active) {
+                // 画面外カリング
+                if (projectile.x + projectile.width < 0 || projectile.x > this.canvas.width ||
+                    projectile.y + projectile.height < 0 || projectile.y > this.canvas.height) {
+                    continue;
+                }
+                projectile.draw(this.ctx);
+            }
+        }
 
         // 敵弾更新
         for (const projectile of this.enemyProjectiles) {
@@ -769,14 +775,7 @@ class Game {
         }
         // 弾描画
         for (const projectile of this.projectiles) {
-            if (projectile.active) {
-                // 画面外カリング
-                if (projectile.x + projectile.width < 0 || projectile.x > this.canvas.width ||
-                    projectile.y + projectile.height < 0 || projectile.y > this.canvas.height) {
-                    continue;
-                }
-                projectile.draw(this.ctx);
-            }
+            if (projectile.active) projectile.draw(this.ctx);
         }
 
         // 敵弾描画
@@ -799,27 +798,58 @@ class Game {
 
         // ダメージテキスト描画
         this.drawDamageTexts();
+
+        // HUD描画
+        if (this.state === 'playing' || this.state === 'levelUp') {
+            this.hud.draw(this.ctx, this.player, this.gameTime, this.killCount, this.score);
+
+            // モバイル用ジョイスティック描画
+            this.drawJoystick();
+        }
+    }
+
+    drawJoystick() {
+        const joystick = this.inputManager.getJoystickInfo();
+        if (!joystick) return;
+
+        const ctx = this.ctx;
+
+        // 外側の円（ベース）
+        ctx.beginPath();
+        ctx.arc(joystick.center.x, joystick.center.y, joystick.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 内側の円（スティック）
+        const stickX = joystick.center.x + joystick.direction.x * joystick.radius * 0.8;
+        const stickY = joystick.center.y + joystick.direction.y * joystick.radius * 0.8;
+
+        ctx.beginPath();
+        ctx.arc(stickX, stickY, 20, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
     }
 
     drawGrid() {
-        this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.1)';
+        this.ctx.strokeStyle = 'rgba(50, 50, 80, 0.3)';
         this.ctx.lineWidth = 1;
 
-        // グリッド移動（疑似スクロール）
-        // 実際の無限スクロールはもっと複雑ですが、ここでは雰囲気だけ
-        // const offsetX = -this.player.x % 50;
-        // const offsetY = -this.player.y % 50;
-
-        // 固定グリッド
         const gridSize = 50;
-        for (let x = 0; x <= this.canvas.width; x += gridSize) {
+
+        for (let x = 0; x < this.canvas.width; x += gridSize) {
             this.ctx.beginPath();
             this.ctx.moveTo(x, 0);
             this.ctx.lineTo(x, this.canvas.height);
             this.ctx.stroke();
         }
 
-        for (let y = 0; y <= this.canvas.height; y += gridSize) {
+        for (let y = 0; y < this.canvas.height; y += gridSize) {
             this.ctx.beginPath();
             this.ctx.moveTo(0, y);
             this.ctx.lineTo(this.canvas.width, y);
@@ -829,36 +859,72 @@ class Game {
 
     drawFlames() {
         for (const flame of this.flames) {
-            this.ctx.save();
-            this.ctx.globalAlpha = (flame.duration - flame.time) / flame.duration * 0.5;
-            this.ctx.fillStyle = '#ff5500';
+            const alpha = 1 - (flame.time / flame.duration);
+
+            // デフォルトは炎色、指定があればその色
+            const isBlue = flame.color === 'blue';
+
+            let colorOuter, colorMid, colorInner;
+
+            if (isBlue) {
+                // 青い炎
+                colorOuter = `rgba(50, 150, 255, ${alpha * 0.8})`;
+                colorMid = `rgba(0, 80, 255, ${alpha * 0.5})`;
+                colorInner = `rgba(100, 200, 255, ${alpha * 0.6})`;
+            } else {
+                // 赤い炎
+                colorOuter = `rgba(255, 150, 50, ${alpha * 0.8})`;
+                colorMid = `rgba(255, 80, 0, ${alpha * 0.5})`;
+                colorInner = `rgba(255, 200, 100, ${alpha * 0.6})`;
+            }
+
+            // 外側のグロー
+            const gradient = this.ctx.createRadialGradient(
+                flame.x, flame.y, 0,
+                flame.x, flame.y, flame.range
+            );
+            gradient.addColorStop(0, colorOuter);
+            gradient.addColorStop(0.5, colorMid);
+            gradient.addColorStop(1, `rgba(0, 0, 0, 0)`);
+
+            this.ctx.fillStyle = gradient;
             this.ctx.beginPath();
             this.ctx.arc(flame.x, flame.y, flame.range, 0, Math.PI * 2);
             this.ctx.fill();
-            this.ctx.restore();
+
+            // 内側の炎
+            this.ctx.fillStyle = colorInner;
+            this.ctx.beginPath();
+            this.ctx.arc(flame.x, flame.y, flame.range * 0.4, 0, Math.PI * 2);
+            this.ctx.fill();
         }
     }
 
     drawEffects() {
         for (const effect of this.effects) {
             if (effect.type === 'shockwave') {
-                this.ctx.save();
                 const alpha = 1 - (effect.time / effect.duration);
-                this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-                this.ctx.lineWidth = 3;
+
+                this.ctx.strokeStyle = `rgba(100, 255, 200, ${alpha})`;
+                this.ctx.lineWidth = 4;
                 this.ctx.beginPath();
                 this.ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
                 this.ctx.stroke();
-                this.ctx.restore();
+
+                // 内側の波紋
+                this.ctx.strokeStyle = `rgba(200, 255, 230, ${alpha * 0.5})`;
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.arc(effect.x, effect.y, effect.radius * 0.7, 0, Math.PI * 2);
+                this.ctx.stroke();
             }
         }
     }
-
     updateDamageTexts(deltaTime) {
         for (let i = this.damageTexts.length - 1; i >= 0; i--) {
             const text = this.damageTexts[i];
             text.update(deltaTime);
-            if (!text.active) {
+            if (text.time >= text.lifeTime) {
                 this.damageTexts.splice(i, 1);
             }
         }
@@ -870,7 +936,7 @@ class Game {
         }
     }
 
-    showDamage(x, y, amount, isCritical = false) {
+    showDamage(x, y, amount, isCritical) {
         // 少し位置をずらす
         const offsetX = (Math.random() - 0.5) * 20;
         const offsetY = (Math.random() - 0.5) * 20;
@@ -886,10 +952,15 @@ class Game {
         if (this.state === 'playing') {
             this.state = 'paused';
             document.getElementById('pause-screen').classList.remove('hidden');
+            soundManager.playSE('se_ui_click'); // 仮の音
+            // BGM一時停止
             soundManager.pauseBGM();
         } else if (this.state === 'paused') {
             this.state = 'playing';
             document.getElementById('pause-screen').classList.add('hidden');
+            this.lastTime = performance.now(); // デルタタイムのリセット
+            soundManager.playSE('se_ui_click');
+            // BGM再開
             soundManager.resumeBGM();
         }
     }
