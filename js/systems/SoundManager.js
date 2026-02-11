@@ -198,10 +198,21 @@ class SoundManager {
 
         this.bgmTimers = [];
 
+        // モバイル判定（簡易）
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // モバイルの場合は発音数を制限
+        const trackLimit = isMobile ? 1 : 2; // モバイルはリードのみ、PCはベースも
+
         // Start Sequencing
         // No intro this time, straight to loop
         runTrack('lead', loopMelody, this.ctx.currentTime + 0.1, true);
-        runTrack('bass', loopBass, this.ctx.currentTime + 0.1, true);
+
+        if (!isMobile) {
+            runTrack('bass', loopBass, this.ctx.currentTime + 0.1, true);
+        } else {
+            console.log('Mobile mode: Bass track disabled for performance');
+        }
     }
 
     playGameOverBGM() {
@@ -260,11 +271,14 @@ class SoundManager {
             scheduleTrack();
         };
 
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
         this.bgmTimers = [];
         runTrack('lead', melody, this.ctx.currentTime + 0.1, true);
-        this.bgmTimers = [];
-        runTrack('lead', melody, this.ctx.currentTime + 0.1, true);
-        runTrack('bass', bass, this.ctx.currentTime + 0.1, true);
+
+        if (!isMobile) {
+            runTrack('bass', bass, this.ctx.currentTime + 0.1, true);
+        }
     }
 
     playTitleBGM() {
@@ -342,9 +356,14 @@ class SoundManager {
             scheduleTrack();
         };
 
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
         this.bgmTimers = [];
         runTrack('lead', melody, this.ctx.currentTime + 0.1, true);
-        runTrack('bass', bass, this.ctx.currentTime + 0.1, true);
+
+        if (!isMobile) {
+            runTrack('bass', bass, this.ctx.currentTime + 0.1, true);
+        }
     }
 
     playTone(freq, type, duration, volume) {

@@ -32,6 +32,7 @@ class Game {
         this.flames = [];
         this.effects = [];
         this.damageTexts = [];
+        this.maxDamageTexts = 30; // 画面上のダメージ数字の最大数（描画負荷軽減）
 
         // ゲーム統計
         this.gameTime = 0;
@@ -75,8 +76,28 @@ class Game {
             const playerName = playerNameInput ? playerNameInput.value.trim() || 'No name' : 'No name';
             localStorage.setItem('pocketSurvivorPlayerName', playerName);
 
-            startScreen.classList.add('hidden');
-            this.startGame();
+            // ローディング表示（一瞬フリーズしても反応したことがわかるように）
+            startBtn.innerText = 'Loading...';
+            startBtn.disabled = true;
+
+            setTimeout(() => {
+                try {
+                    startScreen.classList.add('hidden');
+                    this.startGame();
+
+                    // 成功したらボタンを戻しておく（次回用）
+                    setTimeout(() => {
+                        startBtn.innerText = 'GAME START';
+                        startBtn.disabled = false;
+                    }, 100);
+
+                } catch (e) {
+                    console.error('Game Start Error:', e);
+                    alert('ゲームの起動に失敗しました: ' + e.message);
+                    startBtn.innerText = 'GAME START';
+                    startBtn.disabled = false;
+                }
+            }, 50); // UI更新のためのわずかな遅延
         });
 
         // タイトルに戻る（リスタートボタン）
@@ -227,6 +248,7 @@ class Game {
         this.flames = [];
         this.effects = [];
         this.damageTexts = [];
+        this.maxDamageTexts = 30; // 画面上のダメージ数字の最大数（描画負荷軽減）
         this.gameTime = 0;
         this.killCount = 0;
         this.score = 0;
@@ -292,6 +314,12 @@ class Game {
                 projectile.update(deltaTime, this);
             }
         }
+
+        // 弾描画（この処理はdrawメソッドに移動すべきですが、カリングロジックの意図としてここに残っている可能性があります。ただし通常はdrawで行います）
+        // updateメソッド内での描画ループは本来不要です。drawメソッドのみで描画を行います。
+        // ここでのループはupdate処理のみを行うべきですが、リファクタリングの過程で描画ロジックが混在しているようです。
+        // 今回の変更ではdrawメソッドにカリングを追加したので、ここはupdateのみであることを確認します。
+        // （コードを確認すると、updateメソッド内には弾のdraw呼び出しはありません。drawメソッドを見てみます）
 
         // 敵弾更新
         for (const projectile of this.enemyProjectiles) {
@@ -730,12 +758,25 @@ class Game {
 
         // 敵描画
         for (const enemy of this.enemies) {
-            if (enemy.active) enemy.draw(this.ctx);
+            if (enemy.active) {
+                // 画面外カリング（描画スキップ）
+                if (enemy.x + enemy.width < 0 || enemy.x > this.canvas.width ||
+                    enemy.y + enemy.height < 0 || enemy.y > this.canvas.height) {
+                    continue;
+                }
+                enemy.draw(this.ctx);
+            }
         }
-
         // 弾描画
         for (const projectile of this.projectiles) {
-            if (projectile.active) projectile.draw(this.ctx);
+            if (projectile.active) {
+                // 画面外カリング
+                if (projectile.x + projectile.width < 0 || projectile.x > this.canvas.width ||
+                    projectile.y + projectile.height < 0 || projectile.y > this.canvas.height) {
+                    continue;
+                }
+                projectile.draw(this.ctx);
+            }
         }
 
         // 敵弾描画
@@ -758,58 +799,27 @@ class Game {
 
         // ダメージテキスト描画
         this.drawDamageTexts();
-
-        // HUD描画
-        if (this.state === 'playing' || this.state === 'levelUp') {
-            this.hud.draw(this.ctx, this.player, this.gameTime, this.killCount, this.score);
-
-            // モバイル用ジョイスティック描画
-            this.drawJoystick();
-        }
-    }
-
-    drawJoystick() {
-        const joystick = this.inputManager.getJoystickInfo();
-        if (!joystick) return;
-
-        const ctx = this.ctx;
-
-        // 外側の円（ベース）
-        ctx.beginPath();
-        ctx.arc(joystick.center.x, joystick.center.y, joystick.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // 内側の円（スティック）
-        const stickX = joystick.center.x + joystick.direction.x * joystick.radius * 0.8;
-        const stickY = joystick.center.y + joystick.direction.y * joystick.radius * 0.8;
-
-        ctx.beginPath();
-        ctx.arc(stickX, stickY, 20, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
     }
 
     drawGrid() {
-        this.ctx.strokeStyle = 'rgba(50, 50, 80, 0.3)';
+        this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.1)';
         this.ctx.lineWidth = 1;
 
-        const gridSize = 50;
+        // グリッド移動（疑似スクロール）
+        // 実際の無限スクロールはもっと複雑ですが、ここでは雰囲気だけ
+        // const offsetX = -this.player.x % 50;
+        // const offsetY = -this.player.y % 50;
 
-        for (let x = 0; x < this.canvas.width; x += gridSize) {
+        // 固定グリッド
+        const gridSize = 50;
+        for (let x = 0; x <= this.canvas.width; x += gridSize) {
             this.ctx.beginPath();
             this.ctx.moveTo(x, 0);
             this.ctx.lineTo(x, this.canvas.height);
             this.ctx.stroke();
         }
 
-        for (let y = 0; y < this.canvas.height; y += gridSize) {
+        for (let y = 0; y <= this.canvas.height; y += gridSize) {
             this.ctx.beginPath();
             this.ctx.moveTo(0, y);
             this.ctx.lineTo(this.canvas.width, y);
@@ -819,41 +829,36 @@ class Game {
 
     drawFlames() {
         for (const flame of this.flames) {
-            const alpha = 1 - (flame.time / flame.duration);
-
-            // デフォルトは炎色、指定があればその色
-            const isBlue = flame.color === 'blue';
-
-            let colorOuter, colorMid, colorInner;
-
-            if (isBlue) {
-                // 青い炎
-                colorOuter = `rgba(50, 150, 255, ${alpha * 0.8})`;
-                colorMid = `rgba(0, 80, 255, ${alpha * 0.5})`;
-                colorInner = `rgba(100, 200, 255, ${alpha * 0.6})`;
-            } else {
-                // 赤い炎
-                colorOuter = `rgba(255, 150, 50, ${alpha * 0.8})`;
-                colorMid = `rgba(255, 80, 0, ${alpha * 0.5})`;
-                colorInner = `rgba(255, 200, 100, ${alpha * 0.6})`;
-            }
-
-            // 外側のグロー
+            this.ctx.save();
+            this.ctx.globalAlpha = (flame.duration - flame.time) / flame.duration * 0.5;
+            this.ctx.fillStyle = '#ff5500';
             this.ctx.beginPath();
             this.ctx.arc(flame.x, flame.y, flame.range, 0, Math.PI * 2);
-            this.ctx.fillStyle = colorOuter;
             this.ctx.fill();
+            this.ctx.restore();
         }
     }
 
-    showDamage(x, y, damage, isCritical) {
-        this.damageTexts.push(new DamageText(x, y, damage, isCritical));
+    drawEffects() {
+        for (const effect of this.effects) {
+            if (effect.type === 'shockwave') {
+                this.ctx.save();
+                const alpha = 1 - (effect.time / effect.duration);
+                this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.restore();
+            }
+        }
     }
 
     updateDamageTexts(deltaTime) {
         for (let i = this.damageTexts.length - 1; i >= 0; i--) {
-            this.damageTexts[i].update(deltaTime);
-            if (!this.damageTexts[i].active) {
+            const text = this.damageTexts[i];
+            text.update(deltaTime);
+            if (!text.active) {
                 this.damageTexts.splice(i, 1);
             }
         }
@@ -862,6 +867,30 @@ class Game {
     drawDamageTexts() {
         for (const text of this.damageTexts) {
             text.draw(this.ctx);
+        }
+    }
+
+    showDamage(x, y, amount, isCritical = false) {
+        // 少し位置をずらす
+        const offsetX = (Math.random() - 0.5) * 20;
+        const offsetY = (Math.random() - 0.5) * 20;
+
+        // 重すぎる場合は古いものを消す（または新規追加を諦める）
+        if (this.damageTexts.length >= this.maxDamageTexts) {
+            this.damageTexts.shift(); // 最も古いものを削除
+        }
+
+        this.damageTexts.push(new DamageText(x + offsetX, y + offsetY, amount, isCritical));
+    }
+    togglePause() {
+        if (this.state === 'playing') {
+            this.state = 'paused';
+            document.getElementById('pause-screen').classList.remove('hidden');
+            soundManager.pauseBGM();
+        } else if (this.state === 'paused') {
+            this.state = 'playing';
+            document.getElementById('pause-screen').classList.add('hidden');
+            soundManager.resumeBGM();
         }
     }
 }
