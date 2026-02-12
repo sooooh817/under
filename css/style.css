@@ -644,6 +644,12 @@ body {
     text-align: center;
     max-width: 400px;
     box-shadow: 0 0 30px var(--primary-glow);
+    /* モバイル対応: スクロール可能にする */
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
 }
 
 .ranking-content h2 {
