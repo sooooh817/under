@@ -78,11 +78,13 @@ function setupAuthUI() {
             }
             // 表示名
             displayName.textContent = user.displayName || user.email || 'Google User';
-            // プレイヤー名入力欄に表示名を自動設定（10文字まで）
-            const name = (user.displayName || 'Player').slice(0, 10);
-            playerNameInput.value = name;
-            playerNameInput.setAttribute('readonly', true);
-            playerNameInput.style.opacity = '0.7';
+            // プレイヤー名入力欄に表示名を初期値として設定（10文字まで）、編集は自由
+            if (user.displayName) {
+                playerNameInput.value = user.displayName.slice(0, 10);
+            }
+            // readonlyは設定しない（自由に変更可能）
+            playerNameInput.removeAttribute('readonly');
+            playerNameInput.style.opacity = '';
         }
     });
 
