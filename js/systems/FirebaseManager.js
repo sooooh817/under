@@ -104,22 +104,35 @@ class FirebaseManager {
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             const user = this.auth.currentUser;
+            let result;
 
             if (user && user.isAnonymous) {
                 // 匿名アカウントを Google アカウントにリンク
-                await user.linkWithPopup(provider);
+                result = await user.linkWithPopup(provider);
                 console.log('Anonymous account linked to Google');
             } else {
                 // 通常の Google サインイン
-                await this.auth.signInWithPopup(provider);
+                result = await this.auth.signInWithPopup(provider);
                 console.log('Signed in with Google');
             }
+
+            // linkWithPopup 後は onAuthStateChanged が発火しない場合があるため
+            // result.user には Google の表示名が必ず入っているので手動で新しいユーザを通知
+            if (result && result.user) {
+                this.currentUser = result.user;
+                this.authStateCallbacks.forEach(cb => cb(result.user));
+            }
+
             return true;
         } catch (error) {
             // 既に別アカウントで使用されている場合はそちらでサインイン
             if (error.code === 'auth/credential-already-in-use') {
                 try {
-                    await this.auth.signInWithCredential(error.credential);
+                    const result = await this.auth.signInWithCredential(error.credential);
+                    if (result && result.user) {
+                        this.currentUser = result.user;
+                        this.authStateCallbacks.forEach(cb => cb(result.user));
+                    }
                     console.log('Signed in with existing Google account');
                     return true;
                 } catch (e) {
